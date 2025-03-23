@@ -1,0 +1,24 @@
+[project]
+name = "formula-e-hil"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Liam Ilan"}
+]
+readme = "README.md"
+requires-python = ">=3.9,<3.12"
+dependencies = [
+    "chimera-v2 @ git+https://github.com/UBCFormulaElectric/Consolidated-Firmware.git@master#subdirectory=firmware/chimera_v2"
+]
+
+[tool.poetry]
+packages = [{include = "formula_e_hil", from = "src"}]
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.5"
+ruff = "^0.11.2"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
