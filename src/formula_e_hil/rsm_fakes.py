@@ -32,14 +32,11 @@ class RsmFakes:
 
         # Setup PWM background loop.
         def pwm_loop():
-
             # Run a background PWM loop.
             flow_rate_last_cycle_secs = time.time()
             while not self._pwm_exit_event.is_set():
-
                 # Don't update flow rate if requested frequency is 0.
                 if self._flow_rate_pwm_freq_hz != 0:
-
                     # Calculate requested period.
                     flow_rate_period_secs = 1 / self._flow_rate_pwm_freq_hz
 
@@ -47,14 +44,18 @@ class RsmFakes:
                     time_since_last_cycle_secs = time.time() - flow_rate_last_cycle_secs
                     if time_since_last_cycle_secs <= flow_rate_period_secs / 2:
                         self._ssm_handler.set_data_out(self._FLOW_RATE_PWM, True)
-                    elif flow_rate_period_secs / 2 < time_since_last_cycle_secs <= flow_rate_period_secs:
+                    elif (
+                        flow_rate_period_secs / 2
+                        < time_since_last_cycle_secs
+                        <= flow_rate_period_secs
+                    ):
                         self._ssm_handler.set_data_out(self._FLOW_RATE_PWM, False)
                     else:
                         flow_rate_last_cycle_secs = time.time()
-        
+
         # Spawn the pwm loop in a background thread.
         self._pwm_exit_event = threading.Event()
-        self._pwm_thread = threading.Thread(target = pwm_loop)
+        self._pwm_thread = threading.Thread(target=pwm_loop)
 
     def __exit__(self):
         # Make sure PWM thread closes when the class destructs.
@@ -75,7 +76,8 @@ class RsmFakes:
 
         Args:
             rate_litres_per_min: Litres per minute to report as the flow rate.
-        
+
         """
 
+        # From https://www.adafruit.com/product/828.
         self._flow_rate_pwm_freq_hz = 7.5 * rate_litres_per_min
