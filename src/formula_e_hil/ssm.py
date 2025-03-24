@@ -1,8 +1,10 @@
-import chimera_v2
 from enum import Enum
+from typing import Dict
+
+import chimera_v2
 
 
-class SSM:
+class Ssm:
     # ISOSPI high side and low side Chimera IDs.
     _ISOSPI_HIGH_SIDE_NAME = "SPI_ISOSPI_HS"
     _ISOSPI_LOW_SIDE_NAME = "SPI_ISOSPI_LS"
@@ -18,7 +20,9 @@ class SSM:
     _DAC_RESOLUTION = 12
 
     def __init__(self):
-        """Create an interface to an SSM."""
+        """Create an interface to an SSM (Simulated Sensor Module),
+        with methods that more SSM-specific than the provided Chimera interface.
+        """
 
         self.isospi_high_side = self._chimera_handler.spi_device(
             self._ISOSPI_HIGH_SIDE_NAME
@@ -112,8 +116,8 @@ class SSM:
 
         self._chimera_handler.gpio_write(self._BOOT_LED_NAME, status)
 
-    class AnalogOut(Enum):
-        """Representation of an output analog channel. Maps from channel to DAC channel id."""
+    class AnalogChannel(Enum):
+        """Representation of an output analog channel. Maps from ADC through hole to DAC channel id."""
 
         ONE = 0b00  # VOUT A.
         TWO = 0x01  # VOUT B.
@@ -123,32 +127,44 @@ class SSM:
         SIX = 0x06  # VOUT G.
         SEVEN = 0x05  # VOUT F.
         EIGHT = 0x04  # VOUT E.
+        ALL = 0x0F
 
-    def dac_transmit(self, channel: AnalogOut, out_volts: float):
-        """Transmit a voltage over a channel of the onboard LTC2620.
+    class _DacCommand(Enum):
+        """Representation of a DAC command. Maps from command description to id."""
+
+        LOAD_CHANNEL = 0b0000
+        UPDATE_CHANNEL = 0b0001
+        LOAD_ONE_AND_UPDATE_ALL_CHANNELS = 0b0010
+        LOAD_AND_UPDATE_CHANNEL = 0b0011
+        POWER_DOWN_CHANNEL = 0b0100
+        NO_OPERATION = 0b1111
+
+    def _execute_dac_command(
+        self, command: _DacCommand, channel: AnalogChannel, output_volts: float
+    ):
+        """Execute a SPI command on the DAC. For internal use only.
 
         Args:
-            channel: Channel to target.
-            out_volts: Voltage to output, capped at the reference voltage (SSM.DAC_REF_VOLTS).
+            command: DAC command to execute.
+            channel: Target channel.
+            output_volts: Voltage value to use to compute the data field.
 
         """
 
         # DAC driver for LTC2620, from the datasheet:
         # https://datasheet.ciiva.com/pdfs/VipMasterIC/IC/LITC/LITCS09782/LITCS09782-1.pdf?src-supplier=IHS+Markit
 
-        # 0b0011 writes to input register, and updates DAC register in one command.
-        command_bits = 0b0011
-
-        # Extract channel from AnalogOut enum.
+        # Extract channel and command.
+        command_bits = command.value
         channel_bits = channel.value
 
         # From V_OUT = (k / 2^N) V_REF in the datasheet.
         # ie. k = (V_OUT / V_REF) * 2^N.
         # where k is the setpoint, N is the resolution, and V_REF is the reference voltage.
-        data_bits = int((out_volts / self.DAC_REF_VOLTS) * (2**self._DAC_RESOLUTION))
+        data_bits = int((output_volts / self.DAC_REF_VOLTS) * (2**self._DAC_RESOLUTION))
 
         # Make sure data_bits / requested output are legal.
-        assert out_volts <= self.DAC_REF_VOLTS
+        assert output_volts <= self.DAC_REF_VOLTS
         assert data_bits <= (2**self._DAC_RESOLUTION)
 
         # Build word and convert to bytes.
@@ -163,3 +179,44 @@ class SSM:
 
         # Transmit.
         self._dac_handler.transmit(input_word_bytes)
+
+    def set_analog(self, channel: AnalogChannel, output_volts: float):
+        """Transmit a voltage over an analog output channel.
+
+        Args:
+            channel: Channel to target.
+            output_volts: Voltage to output, capped at the reference voltage.
+
+        """
+
+        self._execute_dac_command(
+            self._DacCommand.LOAD_AND_UPDATE_CHANNEL, channel, output_volts
+        )
+
+    def set_analogs(self, channel_to_output_volts: Dict[AnalogChannel, float]):
+        """Transmit multiple voltages over multiple channels, updating the voltages all at once.
+
+        Args:
+            channel_to_output_volts: A dictionary of channels to desired voltages.
+
+        """
+
+        if len(channel_to_output_volts) > 0:
+            # Preload all channels with the desired voltage.
+            for channel in channel_to_output_volts:
+                self._execute_dac_command(
+                    self._DacCommand.LOAD_CHANNEL,
+                    channel,
+                    channel_to_output_volts[channel],
+                )
+
+            # Update all channels in one go.
+            # NOTE: the LTC2620 DAC cannot update all channels,
+            # without updating the input register on at least one,
+            # so we select an arbritrary channel to write a value to again.
+            channel = next(iter(channel_to_output_volts))
+            self._execute_dac_command(
+                self._DacCommand.LOAD_ONE_AND_UPDATE_ALL_CHANNELS,
+                channel,
+                channel_to_output_volts[channel],
+            )

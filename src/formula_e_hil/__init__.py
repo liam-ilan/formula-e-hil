@@ -1,1 +1,1 @@
-from .ssm import SSM as SSM
+from .fsm_fakes import FsmFakes as FsmFakes
