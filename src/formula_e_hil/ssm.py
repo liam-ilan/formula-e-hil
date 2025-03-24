@@ -24,6 +24,8 @@ class Ssm:
         with methods that more SSM-specific than the provided Chimera interface.
         """
 
+        self._chimera_handler = chimera_v2.SSM()
+        
         self.isospi_high_side = self._chimera_handler.spi_device(
             self._ISOSPI_HIGH_SIDE_NAME
         )
@@ -31,7 +33,6 @@ class Ssm:
             self._ISOSPI_LOW_SIDE_NAME
         )
 
-        self._chimera_handler = chimera_v2.SSM()
         self._dac_handler = self._chimera_handler.spi_device(self._DAC_NAME)
 
         self._chimera_handler.gpio_write(self._DAC_N_CLEAR_NAME, True)
