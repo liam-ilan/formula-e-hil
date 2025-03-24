@@ -17,19 +17,19 @@ class FsmFakes:
         # Set the FSM indicator LED on.
         self._ssm_handler.set_indicator(self.INDICATOR, True)
 
-    def set_steering(self, value: float):
+    def set_steering_angle(self, value: float):
         self._ssm_handler.set_analog(self._STEERING_ANGLE_CHANNEL, value)
 
-    def set_front_brakes(self, value: float):
+    def set_front_brake_pressure(self, value: float):
         self._ssm_handler.set_analog(self._FRONT_BRAKE_PRESSURE_CHANNEL, value)
 
-    def set_apps_1(self, value: float):
+    def set_apps_1_travel(self, value: float):
         self._ssm_handler.set_analog(self._APPS_1_TRAVEL_CHANNEL, value)
 
-    def set_apps_2(self, value: float):
+    def set_apps_2_travel(self, value: float):
         self._ssm_handler.set_analog(self._APPS_2_TRAVEL_CHANNEL, value)
 
-    def set_apps(self, value: float):
+    def set_apps_travel(self, value: float):
         self._ssm_handler.set_analogs(
             {
                 self._APPS_1_TRAVEL_CHANNEL: value,
