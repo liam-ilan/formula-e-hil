@@ -4,7 +4,7 @@ from .ssm import Ssm
 class FsmFakes:
     INDICATOR = Ssm.Indicator.ONE
 
-    _FRONT_BRAKE_PRESSURE_CHANNEL = Ssm.AnalogChannel.SEVEN
+    _BRAKE_PRESSURE_CHANNEL = Ssm.AnalogChannel.SEVEN
     _APPS_1_TRAVEL_CHANNEL = Ssm.AnalogChannel.FIVE
     _APPS_2_TRAVEL_CHANNEL = Ssm.AnalogChannel.THREE
     _STEERING_ANGLE_CHANNEL = Ssm.AnalogChannel.TWO
@@ -20,8 +20,8 @@ class FsmFakes:
     def set_steering_angle(self, value: float):
         self._ssm_handler.set_analog(self._STEERING_ANGLE_CHANNEL, value)
 
-    def set_front_brake_pressure(self, value: float):
-        self._ssm_handler.set_analog(self._FRONT_BRAKE_PRESSURE_CHANNEL, value)
+    def set_brake_pressure(self, value: float):
+        self._ssm_handler.set_analog(self._BRAKE_PRESSURE_CHANNEL, value)
 
     def set_apps_1_travel(self, value: float):
         self._ssm_handler.set_analog(self._APPS_1_TRAVEL_CHANNEL, value)

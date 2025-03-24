@@ -1,6 +1,7 @@
 import threading
 import time
 from .ssm import Ssm
+from . import utils
 
 
 class RsmFakes:
@@ -10,7 +11,7 @@ class RsmFakes:
 
     _SUSPENSION_TRAVEL_RIGHT_CHANNEL = Ssm.AnalogChannel.SEVEN
     _SUSPENSION_TRAVEL_LEFT_CHANNEL = Ssm.AnalogChannel.SIX
-    _REAR_BRAKE_PRESSURE_CHANNEL = Ssm.AnalogChannel.FIVE
+    _BRAKE_PRESSURE_CHANNEL = Ssm.AnalogChannel.FIVE
     _PUMP_POTENTIOMETER_CONTROL_CHANNEL = Ssm.AnalogChannel.THREE
     _PUMP_GROUND_CHANNEL = Ssm.AnalogChannel.TWO
     _LOAD_CELL_NEGATIVE_CHANNEL = Ssm.AnalogChannel.FOUR
@@ -58,18 +59,53 @@ class RsmFakes:
         self._pwm_thread = threading.Thread(target=pwm_loop)
 
     def __exit__(self):
+        """Destruct RsmFakes."""
+
         # Make sure PWM thread closes when the class destructs.
         self._pwm_exit_event.set()
         self._pwm_thread.join()
 
-    def set_suspension_travel_left(self, value: float):
-        self._ssm_handler.set_analog(self._SUSPENSION_TRAVEL_LEFT_CHANNEL, value)
+    def set_suspension_travel_left(self, travel_m: float):
+        """Set supension travel on left wheel.
 
-    def set_suspension_travel_right(self, value: float):
-        self._ssm_handler.set_analog(self._SUSPENSION_TRAVEL_RIGHT_CHANNEL, value)
+        Args:
+            travel_m: Travel in meters.
 
-    def set_rear_brake_pressure(self, value: float):
-        self._ssm_handler.set_analog(self._REAR_BRAKE_PRESSURE_CHANNEL, value)
+        """
+
+        potential_volts = utils.suspension_travel_to_potential_volts(travel_m)
+        self._ssm_handler.set_analog(
+            self._SUSPENSION_TRAVEL_LEFT_CHANNEL, potential_volts
+        )
+
+    def set_suspension_travel_right(self, travel_m: float):
+        """Set supension travel on right wheel.
+
+        Args:
+            travel_m: Travel in meters.
+
+        """
+
+        potential_volts = utils.suspension_travel_to_potential_volts(travel_m)
+        self._ssm_handler.set_analog(
+            self._SUSPENSION_TRAVEL_RIGHT_CHANNEL, potential_volts
+        )
+
+    def set_suspension_travel(self, travel_m: float):
+        """Set supension travel across both left and right side.
+
+        Args:
+            travel_m: Travel in meters.
+
+        """
+
+        potential_volts = utils.suspension_travel_to_potential_volts(travel_m)
+        self._ssm_handler.set_analogs(
+            {
+                self._SUSPENSION_TRAVEL_RIGHT_CHANNEL: potential_volts,
+                self._SUSPENSION_TRAVEL_LEFT_CHANNEL: potential_volts,
+            }
+        )
 
     def set_flow_rate(self, rate_litres_per_min: float):
         """Set flow rate sensor.
@@ -79,5 +115,9 @@ class RsmFakes:
 
         """
 
-        # From https://www.adafruit.com/product/828.
-        self._flow_rate_pwm_freq_hz = 7.5 * rate_litres_per_min
+        self._flow_rate_pwm_freq_hz = utils.flow_rate_to_frequency_hz(
+            rate_litres_per_min
+        )
+
+    def set_brake_pressure(self, value: float):
+        self._ssm_handler.set_analog(self._BRAKE_PRESSURE_CHANNEL, value)

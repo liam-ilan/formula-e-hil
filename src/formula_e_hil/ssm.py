@@ -25,7 +25,7 @@ class Ssm:
         """
 
         self._chimera_handler = chimera_v2.SSM()
-        
+
         self.isospi_high_side = self._chimera_handler.spi_device(
             self._ISOSPI_HIGH_SIDE_NAME
         )
