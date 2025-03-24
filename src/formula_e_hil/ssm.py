@@ -73,24 +73,24 @@ class Ssm:
 
         self._chimera_handler.gpio_write(interlock.value, closed)
 
-    class DataOut(Enum):
-        """Representation of a GPIO data out pin."""
+    class DigitalChannel(Enum):
+        """Representation of a GPIO digital output pin."""
 
         ONE = "GPIO_DOUT_1"
         TWO = "GPIO_DOUT_2"
         THREE = "GPIO_DOUT_3"
         FOUR = "GPIO_DOUT_4"
 
-    def set_data_out(self, data_out: DataOut, state: bool):
-        """Write to a data out GPIO pin.
+    def set_digital(self, channel: DigitalChannel, state: bool):
+        """Write to a digital output.
 
         Args:
-            data_out: GPIO data out pin to target.
-            state: State to set the pin to.
+            channel: Channel to target.
+            state: State to set the channel to.
 
         """
 
-        self._chimera_handler.gpio_write(data_out.value, state)
+        self._chimera_handler.gpio_write(channel.value, state)
 
     _DEBUG_LED_NAME = "GPIO_DEBUG_LED"
 

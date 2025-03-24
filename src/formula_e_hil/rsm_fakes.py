@@ -6,7 +6,7 @@ from .ssm import Ssm
 class RsmFakes:
     INDICATOR = Ssm.Indicator.TWO
 
-    _FLOW_RATE_PWM = Ssm.DataOut.TWO
+    _FLOW_RATE_PWM = Ssm.DigitalChannel.TWO
 
     _SUSPENSION_TRAVEL_RIGHT_CHANNEL = Ssm.AnalogChannel.SEVEN
     _SUSPENSION_TRAVEL_LEFT_CHANNEL = Ssm.AnalogChannel.SIX
@@ -43,13 +43,13 @@ class RsmFakes:
                     # Set 50% duty cycle on flow rate PWM.
                     time_since_last_cycle_secs = time.time() - flow_rate_last_cycle_secs
                     if time_since_last_cycle_secs <= flow_rate_period_secs / 2:
-                        self._ssm_handler.set_data_out(self._FLOW_RATE_PWM, True)
+                        self._ssm_handler.set_digital(self._FLOW_RATE_PWM, True)
                     elif (
                         flow_rate_period_secs / 2
                         < time_since_last_cycle_secs
                         <= flow_rate_period_secs
                     ):
-                        self._ssm_handler.set_data_out(self._FLOW_RATE_PWM, False)
+                        self._ssm_handler.set_digital(self._FLOW_RATE_PWM, False)
                     else:
                         flow_rate_last_cycle_secs = time.time()
 
