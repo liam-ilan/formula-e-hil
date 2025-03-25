@@ -35,6 +35,7 @@ class Ssm:
 
         self._dac_handler = self._chimera_handler.spi_device(self._DAC_NAME)
 
+        # Make sure to hold this high in order to not clear DAC data.
         self._chimera_handler.gpio_write(self._DAC_N_CLEAR_NAME, True)
 
     class Indicator(Enum):
@@ -120,7 +121,7 @@ class Ssm:
     class AnalogChannel(Enum):
         """Representation of an output analog channel. Maps from ADC through hole to DAC channel id."""
 
-        ONE = 0b00  # VOUT A.
+        ONE = 0x00  # VOUT A.
         TWO = 0x01  # VOUT B.
         THREE = 0x02  # VOUT C.
         FOUR = 0x03  # VOUT D.
@@ -173,9 +174,7 @@ class Ssm:
         # 24-----------20------------16-------------4-------------0
         # [ command (4) | channel (4) | data   (12) | UNUSED  (4) ]
         # 3 bytes long, most-significant bit to the left.
-        input_word = (
-            command_bits << 20 + channel_bits << 16 + data_bits << 4 + 0b0000 << 0
-        )
+        input_word = (command_bits << 20) + (channel_bits << 16) + (data_bits << 4)
         input_word_bytes = input_word.to_bytes(3, "big")
 
         # Transmit.
