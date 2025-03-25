@@ -33,7 +33,8 @@ class RsmFakes:
 
         # Setup PWM background loop.
         def pwm_loop():
-            # Run a background PWM loop.
+            """Background PWM loop. Used for flow rate."""
+
             flow_rate_last_cycle_secs = time.time()
             while not self._pwm_exit_event.is_set():
                 # Don't update flow rate if requested frequency is 0.
