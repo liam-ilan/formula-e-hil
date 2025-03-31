@@ -31,8 +31,16 @@ class FsmFakes:
             utils.steering_angle_to_potential_volts(angle_degrees),
         )
 
-    def set_brake_pressure(self, value: float):
-        self._ssm_handler.set_analog(self._BRAKE_PRESSURE_CHANNEL, value)
+    def set_brake_pressure(self, pressure_psi: float):
+        """Set brake pressure.
+
+        Args:
+            pressure_psi: Desired pressure in PSI.
+
+        """
+
+        potential_volts = utils.brake_pressure_to_potential_volts(pressure_psi)
+        self._ssm_handler.set_analog(self._BRAKE_PRESSURE_CHANNEL, potential_volts)
 
     def set_apps_1_travel(self, value: float):
         self._ssm_handler.set_analog(self._APPS_1_TRAVEL_CHANNEL, value)

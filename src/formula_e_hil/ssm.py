@@ -175,10 +175,13 @@ class Ssm:
         # [ command (4) | channel (4) | data   (12) | UNUSED  (4) ]
         # 3 bytes long, most-significant bit to the left.
         input_word = (command_bits << 20) + (channel_bits << 16) + (data_bits << 4)
-        input_word_bytes = input_word.to_bytes(3, "big")
+        input_word_bytes = input_word.to_bytes(4, "big")
 
-        # Transmit.
-        self._dac_handler.transmit(input_word_bytes)
+        # Transact.
+        response = self._dac_handler.transact(input_word_bytes, 4)
+
+        # Response should be the same as the request.
+        assert input_word_bytes == response
 
     def set_analog(self, channel: AnalogChannel, output_volts: float):
         """Transmit a voltage over an analog output channel.

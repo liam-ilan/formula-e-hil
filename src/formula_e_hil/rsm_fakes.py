@@ -120,5 +120,13 @@ class RsmFakes:
             rate_litres_per_min
         )
 
-    def set_brake_pressure(self, value: float):
-        self._ssm_handler.set_analog(self._BRAKE_PRESSURE_CHANNEL, value)
+    def set_brake_pressure(self, pressure_psi: float):
+        """Set brake pressure.
+
+        Args:
+            pressure_psi: Desired pressure in PSI.
+
+        """
+
+        potential_volts = utils.brake_pressure_to_potential_volts(pressure_psi)
+        self._ssm_handler.set_analog(self._BRAKE_PRESSURE_CHANNEL, potential_volts)
