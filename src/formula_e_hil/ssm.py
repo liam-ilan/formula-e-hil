@@ -171,9 +171,11 @@ class Ssm:
 
         # Build word and convert to bytes.
         # Input word format:
-        # 24-----------20------------16-------------4-------------0
-        # [ command (4) | channel (4) | data   (12) | UNUSED  (4) ]
-        # 3 bytes long, most-significant bit to the left.
+        # 32------------24-----------20------------16-------------4-------------0
+        # [ UNUSED  (8) | command (4) | channel (4) | data   (12) | UNUSED  (4) ]
+        # 4 bytes long, most-significant bit to the left.
+        # NOTE: There is a 3-byte mode, however the LTC2620 won't respond with the sent packet,
+        # which is a function useful for confirming that the SPI packet was received.
         input_word = (command_bits << 20) + (channel_bits << 16) + (data_bits << 4)
         input_word_bytes = input_word.to_bytes(4, "big")
 
