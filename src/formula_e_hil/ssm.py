@@ -183,6 +183,9 @@ class Ssm:
         response = self._dac_handler.transact(input_word_bytes, 4)
 
         # Response should be the same as the request.
+        print("DEBUG: SPI Request: ", hex(int.from_bytes(input_word_bytes, "big")))
+        print("DEBUG: SPI Response: ", hex(int.from_bytes(response, "big")))
+
         assert input_word_bytes == response
 
     def set_analog(self, channel: AnalogChannel, output_volts: float):
