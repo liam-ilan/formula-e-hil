@@ -9,7 +9,7 @@ def suspension_travel_to_potential_volts(travel_m: float) -> float:
 
     """
 
-    # From file:///Users/liamilan/Downloads/HT-011201-HT-011214%20-%20Linear%20Travel%20Sensors.pdf.
+    # From https://www.vpw.com.au/assets/brochures/HT-011211.pdf?srsltid=AfmBOop5KeZQrOQHyOzs7KeBUGRtiIAbdzRFf8_wUE9re0sPV3t8Mgt2.
     # (100 V/m) * travel = voltage
     return 100 * travel_m
 
