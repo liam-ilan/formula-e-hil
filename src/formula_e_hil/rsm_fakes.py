@@ -24,7 +24,7 @@ class RsmFakes:
         self._ssm_handler = Ssm()
 
         # Set the RSM indicator LED on.
-        self._ssm_handler.set_indicator(self.INDICATOR, True)
+        self._ssm_handler.set_indicator(self.INDICATOR)
 
         # Tie the pump ground channel to ground.
         self._ssm_handler.set_analog(self._PUMP_GROUND_CHANNEL, 0)

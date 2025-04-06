@@ -98,7 +98,7 @@ windows-all = ["windows-curses ; platform_system == \"Windows\" and platform_pyt
 
 [[package]]
 name = "chimera-v2"
-version = "0.2"
+version = "0.4"
 description = ""
 optional = false
 python-versions = "*"
@@ -122,7 +122,7 @@ pyvisa = "*"
 type = "git"
 url = "https://github.com/UBCFormulaElectric/Consolidated-Firmware.git"
 reference = "master"
-resolved_reference = "e36e6a7d2c33188c690723ba24261994b8cb0065"
+resolved_reference = "48170b2225958ee15365a780d06458ab091fe514"
 subdirectory = "firmware/chimera_v2"
 
 [[package]]

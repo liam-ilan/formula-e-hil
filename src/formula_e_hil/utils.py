@@ -88,7 +88,7 @@ def _apps_travel_to_potential_volts(travel_m: float) -> float:
     max_length_m, min_travel_m = 0.22, 0.145
     max_potential_volts = 3.30
 
-    volts_per_m = (max_length_m - min_travel_m) / max_potential_volts
+    volts_per_m = max_potential_volts / (max_length_m - min_travel_m)
     return max_potential_volts - volts_per_m * travel_m
 
 
@@ -135,13 +135,12 @@ def apps_1_angle_to_potential_volts(angle_radians: float) -> float:
 
     """
 
-    # Derived from Quintuna transfer function.
-    return _apps_travel_to_potential_volts(
-        _apps_angle_to_travel_m(
-            angle_radians,
-            pedal_length_m=0.175,
-        )
+    travel_m = _apps_angle_to_travel_m(
+        angle_radians,
+        pedal_length_m=0.175,
     )
+
+    return _apps_travel_to_potential_volts(travel_m)
 
 
 def apps_2_angle_to_potential_volts(angle_radians: float) -> float:
@@ -155,10 +154,9 @@ def apps_2_angle_to_potential_volts(angle_radians: float) -> float:
 
     """
 
-    # Derived from Quintuna transfer function.
-    return _apps_travel_to_potential_volts(
-        _apps_angle_to_travel_m(
-            angle_radians,
-            pedal_length_m=0.165,
-        )
+    travel_m = _apps_angle_to_travel_m(
+        angle_radians,
+        pedal_length_m=0.165,
     )
+
+    return _apps_travel_to_potential_volts(travel_m)

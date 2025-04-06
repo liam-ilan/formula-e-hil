@@ -43,16 +43,18 @@ class Ssm:
         TWO = "GPIO_INDICATOR_2"
         THREE = "GPIO_INDICATOR_3"
 
-    def set_indicator(self, indicator: Indicator, state: bool):
-        """Write to an indicator LED.
+    def set_indicator(self, indicator: Indicator):
+        """Set the provided indicator on, and the rest off.
 
         Args:
             indicator: Indicator LED to target.
-            state: State to write.
 
         """
 
-        self._chimera_handler.gpio_write(indicator.value, state)
+        for scanned_indicator in self.Indicator:
+            self._chimera_handler.gpio_write(
+                scanned_indicator.value, scanned_indicator == indicator
+            )
 
     class Interlock(Enum):
         """Representation of an interlock peripheral."""

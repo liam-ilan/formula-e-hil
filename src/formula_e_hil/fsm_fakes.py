@@ -16,7 +16,7 @@ class FsmFakes:
         self._ssm_handler = Ssm()
 
         # Set the FSM indicator LED on.
-        self._ssm_handler.set_indicator(self.INDICATOR, True)
+        self._ssm_handler.set_indicator(self.INDICATOR)
 
     def set_steering_angle(self, angle_degrees: float):
         """Set steering angle.
@@ -42,8 +42,8 @@ class FsmFakes:
         potential_volts = utils.brake_pressure_to_potential_volts(pressure_psi)
         self._ssm_handler.set_analog(self._BRAKE_PRESSURE_CHANNEL, potential_volts)
 
-    def set_apps_1_travel(self, angle_radians: float):
-        """Set primary apps travel.
+    def set_apps_1_angle(self, angle_radians: float):
+        """Set primary apps angle.
 
         Args:
             angle_radians: Desired angle in radians.
@@ -55,8 +55,8 @@ class FsmFakes:
             utils.apps_1_angle_to_potential_volts(angle_radians),
         )
 
-    def set_apps_2_travel(self, angle_radians: float):
-        """Set secondary apps travel.
+    def set_apps_2_angle(self, angle_radians: float):
+        """Set secondary apps angle.
 
         Args:
             angle_radians: Desired angle in radians.
@@ -68,8 +68,8 @@ class FsmFakes:
             utils.apps_2_angle_to_potential_volts(angle_radians),
         )
 
-    def set_apps_travel(self, angle_radians: float):
-        """Set all apps travel.
+    def set_apps_angle(self, angle_radians: float):
+        """Set all apps angle.
 
         Args:
             angle_radians: Desired angle in radians.
