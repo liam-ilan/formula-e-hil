@@ -10,14 +10,12 @@ class Ssm:
     _ISOSPI_LOW_SIDE_NAME = "SPI_ISOSPI_LS"
 
     # Maximum voltage out of the SSM DAC.
-    DAC_REF_VOLTS = 5
+    # Determined via experimentation.
+    DAC_REF_VOLTS = 4.33
 
     # DAC spi and clear (active low) Chimera IDs.
     _DAC_NAME = "SPI_DAC"
     _DAC_N_CLEAR_NAME = "GPIO_DAC_N_CLEAR"
-
-    # Resolution of the LTC2620, 12 bits.
-    _DAC_RESOLUTION = 12
 
     def __init__(self):
         """Create an interface to an SSM (Simulated Sensor Module),
@@ -160,33 +158,29 @@ class Ssm:
         command_bits = command.value
         channel_bits = channel.value
 
+        # Ratio from output volts to ref.
+        output_ratio = output_volts / self.DAC_REF_VOLTS
+        assert 0 <= output_ratio <= 1
+
+        # Data bits if we are outputing ref_volts.
+        ref_volts_data_bits = 0xFFF
+
         # From V_OUT = (k / 2^N) V_REF in the datasheet.
         # ie. k = (V_OUT / V_REF) * 2^N.
         # where k is the setpoint, N is the resolution, and V_REF is the reference voltage.
-        data_bits = int((output_volts / self.DAC_REF_VOLTS) * (2**self._DAC_RESOLUTION))
-
-        # Make sure data_bits / requested output are legal.
-        assert output_volts <= self.DAC_REF_VOLTS
-        assert data_bits <= (2**self._DAC_RESOLUTION)
+        data_bits = int(output_ratio * ref_volts_data_bits)
 
         # Build word and convert to bytes.
         # Input word format:
-        # 32------------24-----------20------------16-------------4-------------0
-        # [ UNUSED  (8) | command (4) | channel (4) | data   (12) | UNUSED  (4) ]
-        # 4 bytes long, most-significant bit to the left.
-        # NOTE: There is a 3-byte mode, however the LTC2620 won't respond with the sent packet,
-        # which is a function useful for confirming that the SPI packet was received.
+        # 24-----------20------------16-------------4-------------0
+        # [ command (4) | channel (4) | data   (12) | UNUSED  (4) ]
+        # 3 bytes long, most-significant bit to the left.
+        input_word_length = 3
         input_word = (command_bits << 20) + (channel_bits << 16) + (data_bits << 4)
-        input_word_bytes = input_word.to_bytes(4, "big")
+        input_word_bytes = input_word.to_bytes(input_word_length, "big")
 
-        # Transact.
-        response = self._dac_handler.transact(input_word_bytes, 4)
-
-        # Response should be the same as the request.
-        print("DEBUG: SPI Request: ", hex(int.from_bytes(input_word_bytes, "big")))
-        print("DEBUG: SPI Response: ", hex(int.from_bytes(response, "big")))
-
-        assert input_word_bytes == response
+        # Transmit.
+        self._dac_handler.transmit(input_word_bytes)
 
     def set_analog(self, channel: AnalogChannel, output_volts: float):
         """Transmit a voltage over an analog output channel.
