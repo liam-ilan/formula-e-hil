@@ -42,16 +42,47 @@ class FsmFakes:
         potential_volts = utils.brake_pressure_to_potential_volts(pressure_psi)
         self._ssm_handler.set_analog(self._BRAKE_PRESSURE_CHANNEL, potential_volts)
 
-    def set_apps_1_travel(self, value: float):
-        self._ssm_handler.set_analog(self._APPS_1_TRAVEL_CHANNEL, value)
+    def set_apps_1_travel(self, angle_radians: float):
+        """Set primary apps travel.
 
-    def set_apps_2_travel(self, value: float):
-        self._ssm_handler.set_analog(self._APPS_2_TRAVEL_CHANNEL, value)
+        Args:
+            angle_radians: Desired angle in radians.
 
-    def set_apps_travel(self, value: float):
+        """
+
+        self._ssm_handler.set_analog(
+            self._APPS_1_TRAVEL_CHANNEL,
+            utils.apps_1_angle_to_potential_volts(angle_radians),
+        )
+
+    def set_apps_2_travel(self, angle_radians: float):
+        """Set secondary apps travel.
+
+        Args:
+            angle_radians: Desired angle in radians.
+
+        """
+
+        self._ssm_handler.set_analog(
+            self._APPS_2_TRAVEL_CHANNEL,
+            utils.apps_2_angle_to_potential_volts(angle_radians),
+        )
+
+    def set_apps_travel(self, angle_radians: float):
+        """Set all apps travel.
+
+        Args:
+            angle_radians: Desired angle in radians.
+
+        """
+
         self._ssm_handler.set_analogs(
             {
-                self._APPS_1_TRAVEL_CHANNEL: value,
-                self._APPS_2_TRAVEL_CHANNEL: value,
+                self._APPS_1_TRAVEL_CHANNEL: utils.apps_1_angle_to_potential_volts(
+                    angle_radians
+                ),
+                self._APPS_2_TRAVEL_CHANNEL: utils.apps_2_angle_to_potential_volts(
+                    angle_radians
+                ),
             }
         )
