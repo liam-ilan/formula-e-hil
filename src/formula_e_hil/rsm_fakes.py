@@ -1,4 +1,5 @@
 import threading
+import signal
 import time
 from .ssm import Ssm
 from . import utils
@@ -31,6 +32,12 @@ class RsmFakes:
         # Start flow rate pwm at 0 Hz.
         self._flow_rate_pwm_freq_hz = 0
 
+        # Setup the exit event for the PWM thread.
+        self._pwm_exit_event = threading.Event()
+        signal.signal(
+            signal.SIGINT, lambda _signalnum, _handler: self._pwm_exit_event.set()
+        )
+
         # Setup PWM background loop.
         def pwm_loop():
             """Background PWM loop. Used for flow rate."""
@@ -55,8 +62,7 @@ class RsmFakes:
                     else:
                         flow_rate_last_cycle_secs = time.time()
 
-        # Spawn the pwm loop in a background thread.
-        self._pwm_exit_event = threading.Event()
+        # Spin up thread.
         self._pwm_thread = threading.Thread(target=pwm_loop)
 
     def __exit__(self):
