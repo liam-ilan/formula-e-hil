@@ -93,7 +93,8 @@ def _apps_travel_to_potential_volts(travel_m: float) -> float:
 
 
 def _apps_angle_to_travel_m(
-    angle_radians: float, pedal_length_m: float, pot_horzizontal_distance_m: float
+    angle_radians: float,
+    pedal_length_m: float,
 ) -> float:
     """Convert from accelerator pedal angle to sensor travel.
 
