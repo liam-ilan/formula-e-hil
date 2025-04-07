@@ -13,10 +13,6 @@ class RsmFakes:
     _SUSPENSION_TRAVEL_RIGHT_CHANNEL = Ssm.AnalogChannel.SEVEN
     _SUSPENSION_TRAVEL_LEFT_CHANNEL = Ssm.AnalogChannel.SIX
     _BRAKE_PRESSURE_CHANNEL = Ssm.AnalogChannel.FIVE
-    _PUMP_POTENTIOMETER_CONTROL_CHANNEL = Ssm.AnalogChannel.THREE
-    _PUMP_GROUND_CHANNEL = Ssm.AnalogChannel.TWO
-    _LOAD_CELL_NEGATIVE_CHANNEL = Ssm.AnalogChannel.FOUR
-    _LOAD_CELL_POSITIVE_CHANNEL = Ssm.AnalogChannel.ONE
 
     def __init__(self):
         """Create an interface to the RSM (Rear-Sensor Module), through an SSM."""
@@ -25,9 +21,6 @@ class RsmFakes:
 
         # Set the RSM indicator LED on.
         self._ssm_handler.set_indicator(self.INDICATOR)
-
-        # Tie the pump ground channel to ground.
-        self._ssm_handler.set_analog(self._PUMP_GROUND_CHANNEL, 0)
 
         # Start flow rate pwm at 0 Hz.
         self._flow_rate_pwm_freq_hz = 0
