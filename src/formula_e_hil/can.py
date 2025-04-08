@@ -41,7 +41,6 @@ class Can:
             signal.SIGINT, lambda _signalnum, _handler: self._can_rx_exit_event.set()
         )
 
-        # Setup PWM background loop.
         def can_rx_loop():
             """Background CAN RX loop."""
 
@@ -87,7 +86,7 @@ class Can:
 
         return self.rx_table[message_name]
 
-    def transmit(self, message_name: str, signals: Dict[str, Any]):
+    def transmit_message(self, message_name: str, signals: Dict[str, Any]):
         """Transmit a message given it's signals.
 
         Args:
