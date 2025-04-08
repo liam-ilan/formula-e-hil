@@ -1,11 +1,13 @@
+from __future__ import annotations
 from typing import Any, Dict, Optional
 import urllib.request
 import can
 import cantools.database
 import threading
 import signal
+import time
 
-LATEST_DBC_URL = "https://github.com/UBCFormulaElectric/Consolidated-Firmware/releases/download/latest/quadruna.dbc"
+LATEST_DBC_URL = "https://github.com/UBCFormulaElectric/Consolidated-Firmware/releases/download/latest/quintuna.dbc"
 
 
 class Can:
@@ -59,6 +61,13 @@ class Can:
         # Spin up thread.
         self._can_rx_thread = threading.Thread(target=can_rx_loop)
 
+    def __exit__(self):
+        """Destruct Can."""
+
+        # Make sure CAN rx thread closes when the class destructs.
+        self._can_rx_exit_event.set()
+        self._can_rx_thread.join()
+
     def receive(self, message_name: str, signal_name: str) -> Optional[Any]:
         """Receive a signal given it's name the parent's message name.
 
@@ -101,3 +110,69 @@ class Can:
             arbitration_id=message_type.frame_id, data=raw_signals
         )
         self._can_bus.send(raw_message)
+
+    def transmit_message_periodic(
+        self, period_secs: int, message_name: str, signals: Dict[str, Any]
+    ) -> PeriodicCanTransmitter:
+        """Create a new periodic can transmitter.
+
+        Args:
+            period_secs: Period between succesive transmissions.
+            message_name: Name of message.
+            signals: Map between name of signal and value.
+
+        Returns:
+            A wrapper around the Periodic Transmitter thread.
+            To stop periodic transmission, simply ``del`` the handle.
+
+        """
+
+        return PeriodicCanTransmitter(self, period_secs, message_name, signals)
+
+
+class PeriodicCanTransmitter:
+    def __init__(
+        self, parent: Can, period_secs: int, message_name: str, signals: Dict[str, Any]
+    ):
+        """Create a new periodic can transmitter.
+
+        This constructor should never be called by the user,
+        instead use ``Can.transmit_message_periodic``.
+
+        Args:
+            parent: Parent CAN handler.
+            period_secs: Period between succesive transmissions.
+            message_name: Name of message.
+            signals: Map between name of signal and value.
+
+        """
+
+        self.signals = signals
+
+        self._parent = parent
+        self._message_name = message_name
+        self._period_secs = period_secs
+
+        # Setup exit event.
+        self._exit_event = threading.Event()
+        signal.signal(
+            signal.SIGINT, lambda _signalnum, _handler: self._exit_event.set()
+        )
+
+        # Main loop.
+        def loop():
+            """Main loop."""
+
+            while not self._exit_event.is_set():
+                self._parent.transmit_message(self._message_name, self.signals)
+                time.sleep(self._period_secs)
+
+        # Spin up thread.
+        self._thread = threading.Thread(target=loop)
+
+    def __exit__(self):
+        """Destruct the transmitter."""
+
+        # Make sure transmitter kills thread when dead.
+        self._exit_event.set()
+        self._thread.join()

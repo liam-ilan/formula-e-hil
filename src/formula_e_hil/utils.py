@@ -1,6 +1,3 @@
-import math
-
-
 def suspension_travel_to_potential_volts(travel_m: float) -> float:
     """Convert from suspension travel to sensor voltage output.
 
@@ -12,7 +9,7 @@ def suspension_travel_to_potential_volts(travel_m: float) -> float:
 
     """
 
-    # From https://www.vpw.com.au/assets/brochures/HT-011211.pdf?srsltid=AfmBOop5KeZQrOQHyOzs7KeBUGRtiIAbdzRFf8_wUE9re0sPV3t8Mgt2.
+    # From https://www.vpw.com.au/assets/brochures/HT-011211.pdf
     # (100 V/m) * travel = voltage
     return 100 * travel_m
 
@@ -73,90 +70,18 @@ def brake_pressure_to_potential_volts(brake_pressure_psi: float) -> float:
     return voltage_offset + volts_per_psi * brake_pressure_psi
 
 
-def _apps_travel_to_potential_volts(travel_m: float) -> float:
-    """Convert from accelerator pedal travel to accelerator pedal sensor voltage output.
+def apps_percentage_to_potential_volts(apps_percentage: float) -> float:
+    """Convert from apps percentage to apps sensor voltage output.
 
     Args:
-        travel_m: Target travel in meters.
+        apps_percentage: Target apps percentage, in range [0, 100].
 
     Returns:
-        Output voltage of accelerator pedal sensor in volts.
+        Output voltage of apps sensor in volts.
 
     """
 
-    # Derived from Quintuna transfer function.
-    max_length_m, min_travel_m = 0.22, 0.145
-    max_potential_volts = 3.30
-
-    volts_per_m = max_potential_volts / (max_length_m - min_travel_m)
-    return max_potential_volts - volts_per_m * travel_m
-
-
-def _apps_angle_to_travel_m(
-    angle_radians: float,
-    pedal_length_m: float,
-) -> float:
-    """Convert from accelerator pedal angle to sensor travel.
-
-    Args:
-        angle_radians: Target angle in radians.
-        pedal_length_m: Distance between of the pivot of the pedal and the mounting point of the sensor to the pedal.
-
-    Returns:
-        Travel in meters.
-
-    """
-
-    # Distance between the pivot of the pedal and the base of the sensor.
-    pot_horzizontal_distance_m = 0.09061
-
-    # Derived from Quintuna transfer function.
-    travel_m = (
-        max(
-            pot_horzizontal_distance_m**2
-            + pedal_length_m**2
-            - 2 * pot_horzizontal_distance_m * pedal_length_m * math.cos(angle_radians),
-            0,
-        )
-        ** 0.5
-    )
-
-    return travel_m
-
-
-def apps_1_angle_to_potential_volts(angle_radians: float) -> float:
-    """Convert from primary accelerator pedal angle to sensor voltage.
-
-    Args:
-        angle_radians: Target angle in radians.
-
-    Returns:
-        Sensor output in volts.
-
-    """
-
-    travel_m = _apps_angle_to_travel_m(
-        angle_radians,
-        pedal_length_m=0.175,
-    )
-
-    return _apps_travel_to_potential_volts(travel_m)
-
-
-def apps_2_angle_to_potential_volts(angle_radians: float) -> float:
-    """Convert from secondary accelerator pedal angle to sensor voltage.
-
-    Args:
-        angle_radians: Target angle in radians.
-
-    Returns:
-        Sensor output in volts.
-
-    """
-
-    travel_m = _apps_angle_to_travel_m(
-        angle_radians,
-        pedal_length_m=0.165,
-    )
-
-    return _apps_travel_to_potential_volts(travel_m)
+    # Note: HIL testing runs before we can validate the accelerator pedals.
+    # Temporarilly, we run a linear transfer function that outputs 5V at 100%,
+    # and 0V at 0%.
+    return apps_percentage / 100 * 5

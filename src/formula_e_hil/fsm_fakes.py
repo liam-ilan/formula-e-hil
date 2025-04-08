@@ -42,47 +42,47 @@ class FsmFakes:
         potential_volts = utils.brake_pressure_to_potential_volts(pressure_psi)
         self._ssm_handler.set_analog(self._BRAKE_PRESSURE_CHANNEL, potential_volts)
 
-    def set_apps_1_angle(self, angle_radians: float):
-        """Set primary apps angle.
+    def set_apps_1_percentage(self, percentage: float):
+        """Set primary apps percentage.
 
         Args:
-            angle_radians: Desired angle in radians.
+            percentage: Desired percentage.
 
         """
 
         self._ssm_handler.set_analog(
             self._APPS_1_TRAVEL_CHANNEL,
-            utils.apps_1_angle_to_potential_volts(angle_radians),
+            utils.apps_percentage_to_potential_volts(percentage),
         )
 
-    def set_apps_2_angle(self, angle_radians: float):
-        """Set secondary apps angle.
+    def set_apps_2_percentage(self, percentage: float):
+        """Set secondary apps percentage.
 
         Args:
-            angle_radians: Desired angle in radians.
+            percentage: Desired percentage.
 
         """
 
         self._ssm_handler.set_analog(
             self._APPS_2_TRAVEL_CHANNEL,
-            utils.apps_2_angle_to_potential_volts(angle_radians),
+            utils.apps_percentage_to_potential_volts(percentage),
         )
 
-    def set_apps_angle(self, angle_radians: float):
-        """Set all apps angle.
+    def set_apps_percentage(self, percentage: float):
+        """Set all apps percentage.
 
         Args:
-            angle_radians: Desired angle in radians.
+            percentage: Desired percentage.
 
         """
 
         self._ssm_handler.set_analogs(
             {
-                self._APPS_1_TRAVEL_CHANNEL: utils.apps_1_angle_to_potential_volts(
-                    angle_radians
+                self._APPS_1_TRAVEL_CHANNEL: utils.apps_percentage_to_potential_volts(
+                    percentage
                 ),
-                self._APPS_2_TRAVEL_CHANNEL: utils.apps_2_angle_to_potential_volts(
-                    angle_radians
+                self._APPS_2_TRAVEL_CHANNEL: utils.apps_percentage_to_potential_volts(
+                    percentage
                 ),
             }
         )
